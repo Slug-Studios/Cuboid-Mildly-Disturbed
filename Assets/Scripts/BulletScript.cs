@@ -6,21 +6,11 @@ public class BulletScript : MonoBehaviour
 {
     public float pierce;
     public float lifespanMax;
-    private float lifespan;
 
     // Start is called before the first frame update
     void Start()
     {
-        
-    }
-
-    void Update()
-    {
-        lifespan = lifespan + Time.deltaTime;
-        if (lifespan > lifespanMax)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject, lifespanMax);
     }
 
     public void OnTriggerEnter(Collider other)

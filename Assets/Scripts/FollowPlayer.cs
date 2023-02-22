@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class FollowPlayer : MonoBehaviour
 {
-    public GameObject Player;
     public Canvas DeathScreen;
     private bool dead;
 
@@ -16,9 +15,9 @@ public class FollowPlayer : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
-        transform.position = new Vector3(Player.transform.position.x, Player.transform.position.y, transform.position.z);
+        transform.rotation = Quaternion.Euler(0f, 0f, 0f);
         
     }
     public void death()
