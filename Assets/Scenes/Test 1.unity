@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 530896649318185926, guid: f02e7c8dd588d2e498277cc33c8f22bc, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 530896649318185926, guid: f02e7c8dd588d2e498277cc33c8f22bc, type: 3}
       propertyPath: m_LocalScale.x
@@ -281,11 +281,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 811236017998589604, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.6411033
+      value: -10.08
       objectReference: {fileID: 0}
     - target: {fileID: 811236017998589604, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.45078957
+      value: -0.27
       objectReference: {fileID: 0}
     - target: {fileID: 811236017998589604, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -464,7 +464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fec075660abd494449584b32106eac59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetPos: {x: 0, y: 0}
+  targetPos: {x: -10, y: 0}
   connectingScene: Test 2
 --- !u!61 &1995895832
 BoxCollider2D:

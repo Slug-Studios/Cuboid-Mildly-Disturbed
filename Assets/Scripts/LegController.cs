@@ -4,168 +4,122 @@ using UnityEngine;
 
 public class LegController : MonoBehaviour
 {
-    public HingeJoint2D RRHip;
-    public HingeJoint2D LLHip;
-    public HingeJoint2D RRKnee;
-    public HingeJoint2D LLKnee;
-    public HingeJoint2D RRAnkle;
-    public HingeJoint2D LLAnkle;
+    public HingeJoint2D RHip;
+    public JointMotor2D RHipM;
+    public HingeJoint2D LHip;
+    public JointMotor2D LHipM;
+    public HingeJoint2D RKnee;
+    public JointMotor2D RKneeM;
+    public HingeJoint2D LKnee;
+    public JointMotor2D LKneeM;
+    public HingeJoint2D RAnkle;
+    public JointMotor2D RAnkleM;
+    public HingeJoint2D LAnkle;
+    public JointMotor2D LAnkleM;
 
-    private float walkSpeed = 100f;
-    public int walkPhase;
-    public float walkWait;
+    public Vector2 TargetPosR;
+    public Vector2 TargetPosL;
+    private float TargetDst;
+    private float TargetAngleR;
+    private float KneeTargetAngleR;
+    private float TargetAngleL;
+    private float KneeTargetAngleL;
+    public float ThighLength;
+    public float CalfLength;
+    private float jointSpeed = 30;
+    private float targetSpeed = 0.25f;
+    private Rigidbody2D rigidbodyRef;
 
-    // Start is called before the first frame update
-    void Start()
+    public void Awake()
     {
-        
+        rigidbodyRef = GetComponent<Rigidbody2D>();
+        TargetPosR = new Vector2(ThighLength, -CalfLength);
+        TargetPosL = new Vector2(-CalfLength, -ThighLength);
     }
 
-    // Update is called once per frame
-    void Update()
+    //Set target angles
+    private void setTargetKneeAngle(int leg) //0 for right, 1 for left
     {
-        //Set variables
-        var RHip = new JointMotor2D();
-        var LHip = new JointMotor2D();
-        var RKnee = new JointMotor2D();
-        var LKnee = new JointMotor2D();
-        var RAnkle = new JointMotor2D();
-        var LAnkle = new JointMotor2D();
-        RHip.maxMotorTorque = 1000f;
-        LHip.maxMotorTorque = 1000f;
-        RKnee.maxMotorTorque = 1000f;
-        LKnee.maxMotorTorque = 1000f;
-        RAnkle.maxMotorTorque = 10000f;
-        LAnkle.maxMotorTorque = 10000f;
-
-        //Lmfao walking moment
-        if (walkPhase == 1)
+        Vector2 TargetPos = Vector2.zero;
+        if (leg == 0)
         {
-            
-            RHip.motorSpeed = walkSpeed*1.75f;
-            LHip.motorSpeed = -walkSpeed*1.5f;
-            RKnee.motorSpeed = -walkSpeed*1.5f;
-            LKnee.motorSpeed = walkSpeed;
-            RAnkle.motorSpeed = walkSpeed*1.5f;
-            LAnkle.motorSpeed = -walkSpeed/1.5f;
-        }else if (walkPhase == 2)
+            TargetPos = TargetPosR;
+        } else
         {
-            RHip.motorSpeed = -walkSpeed*1.5f;
-            LHip.motorSpeed = walkSpeed*1.75f;
-            RKnee.motorSpeed = walkSpeed;
-            LKnee.motorSpeed = -walkSpeed*1.5f;
-            RAnkle.motorSpeed = -walkSpeed/1.5f;
-            LAnkle.motorSpeed = walkSpeed*1.5f;
-        } else if (walkPhase == -1)
-        {
-
-            RHip.motorSpeed = -walkSpeed * 1.75f;
-            LHip.motorSpeed = walkSpeed * 1.5f;
-            RKnee.motorSpeed = walkSpeed * 1.5f;
-            LKnee.motorSpeed = -walkSpeed;
-            RAnkle.motorSpeed = -walkSpeed * 1.5f;
-            LAnkle.motorSpeed = walkSpeed / 1.5f;
+            TargetPos = TargetPosL;
         }
-        else if (walkPhase == -2)
+        TargetDst = MathC.Hyp(TargetPos.x, TargetPos.y);
+        if (TargetDst > ThighLength + CalfLength - 0.001f)
         {
-            RHip.motorSpeed = walkSpeed * 1.5f;
-            LHip.motorSpeed = -walkSpeed * 1.75f;
-            RKnee.motorSpeed = -walkSpeed;
-            LKnee.motorSpeed = walkSpeed * 1.5f;
-            RAnkle.motorSpeed = walkSpeed / 1.5f;
-            LAnkle.motorSpeed = -walkSpeed * 1.5f;
+            TargetDst = ThighLength + CalfLength - 0.001f;
         }
-
-        //Set all of the speed things
-        LLHip.motor = LHip;
-        RRHip.motor = RHip;
-        LLKnee.motor = LKnee;
-        RRKnee.motor = RKnee;
-        RRAnkle.motor = RAnkle;
-        LLAnkle.motor = LAnkle;
-
-        //Input stuff, do walk cycle if a or d
-        if (Input.GetKey(KeyCode.D))
+        float TargetAngle = Mathf.Rad2Deg * (Mathf.Atan2(-TargetPos.x, -TargetPos.y) + Mathf.PI/2 - MathC.CosLawAng(ThighLength, TargetDst, CalfLength));
+        float KneeTargetAngle = 180 - MathC.CosLawAng(CalfLength, ThighLength, TargetDst) * Mathf.Rad2Deg;
+        if(leg == 0)
         {
-            if (walkWait >= 0 && walkWait < 3)
-            {
-                walkPhase = 1;
-            }
-            if (walkWait >= 3)
-            {
-                walkPhase = 2;
-            }
-            if (walkWait > 6)
-            {
-                walkWait = 0;
-            }
-            walkWait = walkWait + Time.deltaTime;
+            TargetAngleR = TargetAngle;
+            KneeTargetAngleR = KneeTargetAngle;
+        } else
+        {
+            TargetAngleL = TargetAngle;
+            KneeTargetAngleL = KneeTargetAngle;
         }
-        else if (Input.GetKey(KeyCode.A))
+    }
+    public void Update()
+    {
+        //manual movement of the 2 targets
+        TargetPosR.x += Input.GetAxis("Horizontal") * Time.deltaTime * targetSpeed;
+        TargetPosR.y += Input.GetAxis("Vertical") * Time.deltaTime * targetSpeed;
+        TargetPosL.x += Input.GetAxis("Horizontal2") * Time.deltaTime * targetSpeed;
+        TargetPosL.y += Input.GetAxis("Vertical2") * Time.deltaTime * targetSpeed;
+        if (Input.GetKey(KeyCode.LeftShift)) //move legs faster if shift is pressed
         {
-            if (walkWait >= 0 && walkWait < 3)
-            {
-                walkPhase = -1;
-            }
-            if (walkWait >= 3)
-            {
-                walkPhase = -2;
-            }
-            if (walkWait > 6)
-            {
-                walkWait = 0;
-            }
-            walkWait = walkWait + Time.deltaTime;
+            targetSpeed = 3;
+            jointSpeed = 200;
+        } else
+        {
+            targetSpeed = 1f;
+            jointSpeed = 50;
         }
-        else
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            walkWait = 0;
-            walkPhase = 1;
+            TargetPosR = new Vector2(ThighLength, -CalfLength);
+            TargetPosL = new Vector2(-CalfLength, -ThighLength);
+        }
+        //correct pos make sure it doesn't get out of range
+        setTargetKneeAngle(0);
+        setTargetKneeAngle(1);
+        if (MathC.Hyp(TargetPosR.x, TargetPosR.y) > CalfLength + ThighLength)
+        {
+            setTargetKneeAngle(0);
+            TargetPosR = new Vector2(Mathf.Cos(TargetAngleR * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f), -Mathf.Sin(TargetAngleR * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f));
+        }
+        if (MathC.Hyp(TargetPosL.x, TargetPosL.y) > CalfLength + ThighLength)
+        {
+            setTargetKneeAngle(1);
+            TargetPosL = new Vector2(Mathf.Cos(TargetAngleL * Mathf.Deg2Rad) * (ThighLength + CalfLength -0.05f), -Mathf.Sin(TargetAngleL * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f));
         }
 
-        var RRRHip = RRHip.limits;
-        var LLLHip = LLHip.limits;
-        var RRRKnee = RRKnee.limits;
-        var LLLKnee = LLKnee.limits;
-        var RRRAnkle = RRAnkle.limits;
-        var LLLAnkle = LLAnkle.limits;
-        //flip if input
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            RRRHip.min = -90;
-            RRRHip.max = 66;
-            LLLHip.min = -90;
-            LLLHip.max = 66;
-            RRRKnee.min = 80;
-            RRRKnee.max = 0;
-            LLLKnee.min = 80;
-            LLLKnee.max = 0;
-            RRRAnkle.min = 80;
-            RRRAnkle.max = -10;
-            LLLAnkle.min = 80;
-            LLLAnkle.max = -10;
-        } else if (Input.GetKeyDown(KeyCode.A))
-        {
-            RRRHip.min = -90;
-            RRRHip.max = 66;
-            LLLHip.min = -90;
-            LLLHip.max = 66;
-            RRRKnee.min = 80;
-            RRRKnee.max = 0;
-            LLLKnee.min = 80;
-            LLLKnee.max = 0;
-            RRRAnkle.min = 10;
-            RRRAnkle.max = -80;
-            LLLAnkle.min = 10;
-            LLLAnkle.max = -80;
-        }
-        RRHip.limits = RRRHip;
-        LLHip.limits = LLLHip;
-        RRKnee.limits = RRRKnee;
-        LLKnee.limits = LLLKnee;
-        RRAnkle.limits = RRRAnkle;
-        LLAnkle.limits = LLLAnkle;
+        //apply torque to the main body to stand up
+        rigidbodyRef.AddTorque(Mathf.Clamp(-transform.rotation.z*300, -8000,8000));
+
+        //move the hips and knees to correct positions
+        RHipM = new JointMotor2D { motorSpeed = -(RHip.jointAngle - TargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        RHip.motor = RHipM;
+        RKneeM = new JointMotor2D { motorSpeed = -(RKnee.jointAngle - KneeTargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        RKnee.motor = RKneeM;
+        LHipM = new JointMotor2D { motorSpeed = -(LHip.jointAngle - TargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        LHip.motor = LHipM;
+        LKneeM = new JointMotor2D { motorSpeed = -(LKnee.jointAngle - KneeTargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        LKnee.motor = LKneeM;
 
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(TargetPosR + (Vector2)transform.position + Vector2.down*0.5f, 0.05f);
+        Gizmos.DrawSphere(TargetPosL + (Vector2)transform.position + Vector2.down * 0.5f, 0.05f);
     }
 }
