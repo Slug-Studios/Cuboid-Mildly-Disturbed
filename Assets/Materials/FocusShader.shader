@@ -5,7 +5,8 @@ Shader "tintImageEffectShader"
    Properties
    {
       _MainTex ("Source", 2D) = "white" {}
-      _Color ("Tint", Color) = (1,1,1,1)
+      _Color("Tint", Color) = (1,1,1,1)
+      _Intensity("Intensity", Float) = 0
    }
    SubShader
    {
@@ -44,13 +45,16 @@ Shader "tintImageEffectShader"
          sampler2D _MainTex;
          float4 _MainTex_ST;
          float4 _Color;
+         float _Intensity;
 
          float4 fragmentShader(vertexOutput i) : COLOR
          {
             float4 color = tex2D(_MainTex, 
                UnityStereoScreenSpaceUVAdjust(
                i.texcoord, _MainTex_ST));		
-            return color * _Color;
+            //return float4(_Intensity, 0, 0, 1);
+            //return color * _Color;
+            return color * lerp(1, _Color, _Intensity);
          }
          ENDCG
       }

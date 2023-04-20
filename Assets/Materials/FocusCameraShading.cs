@@ -8,6 +8,7 @@ public class FocusCameraShading: MonoBehaviour
 {
 
     public Material material;
+    public float intensity = 0;
 
     void Start()
     {
@@ -21,6 +22,7 @@ public class FocusCameraShading: MonoBehaviour
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
+        material.SetFloat("_Intensity", intensity);
         Graphics.Blit(source, destination, material);
     }
 }

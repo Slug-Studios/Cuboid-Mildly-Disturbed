@@ -145,18 +145,34 @@ public class Movement : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.F))
             {
+                //if(focusTime < focusTimeMax)
                 focusTime+= Time.deltaTime;
                 Time.timeScale = focusTimeSlowFac;
-                focusCircle.SetActive(true);
+                //focusCircle.SetActive(true); I'll be raplacing this with shader magic soon
+                if(focusShader.intensity < 1)
+                {
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (2f * (Time.deltaTime/focusTimeSlowFac)));
+                    Debug.Log(focusShader.intensity);
+                }
+                
                 focusShader.enabled = true;
             } else
             {
+                if(Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
                 if (focusTime > 0)
                 {
                     focusTime -= Time.deltaTime / 2;
                 }
-                focusCircle.SetActive(false);
-                focusShader.enabled = false;
+                //focusCircle.SetActive(false);
+                if (focusShader.intensity > 0)
+                {
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f*Time.deltaTime));
+                    Debug.Log(focusShader.intensity);
+                }
+                else
+                {
+                    focusShader.enabled = false;
+                }
             }
         }
     }
