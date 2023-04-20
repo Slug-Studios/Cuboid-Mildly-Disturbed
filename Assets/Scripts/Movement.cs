@@ -49,6 +49,7 @@ public class Movement : MonoBehaviour
     private float focusTimeSlowFac = 0.5f;
     public GameObject focusCircle;
     public FocusCameraShading focusShader;
+    public bool focusOverload;
 
     private void Awake()
     {
@@ -143,20 +144,50 @@ public class Movement : MonoBehaviour
         //telekenesis
         if (Upgrades[10])
         {
-            if (Input.GetKey(KeyCode.F))
+            if (focusOverload)
             {
-                focusTime+= Time.deltaTime;
-                Time.timeScale = focusTimeSlowFac;
-                focusCircle.SetActive(true);
-                focusShader.enabled = true;
-            } else
-            {
+                if (Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
                 if (focusTime > 0)
                 {
                     focusTime -= Time.deltaTime / 2;
                 }
                 focusCircle.SetActive(false);
-                focusShader.enabled = false;
+                if (focusShader.intensity > 0)
+                {
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f * Time.deltaTime));
+                    Debug.Log(focusShader.intensity);
+                }
+                else
+                {
+                    focusShader.enabled = false;
+                }
+            } else if (Input.GetKey(KeyCode.F) && focusTime <= focusTimeMax)
+            {
+                focusTime+= Time.deltaTime;
+                Time.timeScale = focusTimeSlowFac;
+                focusCircle.SetActive(true);
+                if (focusShader.intensity < 1)
+                {
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (2f * (Time.deltaTime / focusTimeSlowFac)));
+                    Debug.Log(focusShader.intensity);
+                }
+            } else
+            {
+                if (Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
+                if (focusTime > 0)
+                {
+                    focusTime -= Time.deltaTime / 2;
+                }
+                focusCircle.SetActive(false);
+                if (focusShader.intensity > 0)
+                {
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f * Time.deltaTime));
+                    Debug.Log(focusShader.intensity);
+                }
+                else
+                {
+                    focusShader.enabled = false;
+                }
             }
         }
     }
