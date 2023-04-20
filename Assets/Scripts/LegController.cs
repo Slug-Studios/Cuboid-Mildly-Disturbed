@@ -48,13 +48,13 @@ public class LegController : MonoBehaviour
         {
             TargetPos = TargetPosL;
         }
-        TargetDst = MathC.Hyp(TargetPos.x, TargetPos.y);
+        TargetDst = MathCustom.Hyp(TargetPos.x, TargetPos.y);
         if (TargetDst > ThighLength + CalfLength - 0.001f)
         {
             TargetDst = ThighLength + CalfLength - 0.001f;
         }
-        float TargetAngle = Mathf.Rad2Deg * (Mathf.Atan2(-TargetPos.x, -TargetPos.y) + Mathf.PI/2 - MathC.CosLawAng(ThighLength, TargetDst, CalfLength));
-        float KneeTargetAngle = 180 - MathC.CosLawAng(CalfLength, ThighLength, TargetDst) * Mathf.Rad2Deg;
+        float TargetAngle = Mathf.Rad2Deg * (Mathf.Atan2(-TargetPos.x, -TargetPos.y) - MathCustom.CosLawAng(ThighLength, TargetDst, CalfLength)) + 90;
+        float KneeTargetAngle = 180 - MathCustom.CosLawAng(CalfLength, ThighLength, TargetDst) * Mathf.Rad2Deg;
         if(leg == 0)
         {
             TargetAngleR = TargetAngle;
@@ -68,10 +68,10 @@ public class LegController : MonoBehaviour
     public void Update()
     {
         //manual movement of the 2 targets
-        TargetPosR.x += Input.GetAxis("Horizontal") * Time.deltaTime * targetSpeed;
-        TargetPosR.y += Input.GetAxis("Vertical") * Time.deltaTime * targetSpeed;
-        TargetPosL.x += Input.GetAxis("Horizontal2") * Time.deltaTime * targetSpeed;
-        TargetPosL.y += Input.GetAxis("Vertical2") * Time.deltaTime * targetSpeed;
+        TargetPosR.x += Input.GetAxis("Horizontal2") * Time.deltaTime * targetSpeed;
+        TargetPosR.y += Input.GetAxis("Vertical2") * Time.deltaTime * targetSpeed;
+        TargetPosL.x += Input.GetAxis("Horizontal") * Time.deltaTime * targetSpeed;
+        TargetPosL.y += Input.GetAxis("Vertical") * Time.deltaTime * targetSpeed;
         if (Input.GetKey(KeyCode.LeftShift)) //move legs faster if shift is pressed
         {
             targetSpeed = 3;
@@ -89,28 +89,28 @@ public class LegController : MonoBehaviour
         //correct pos make sure it doesn't get out of range
         setTargetKneeAngle(0);
         setTargetKneeAngle(1);
-        if (MathC.Hyp(TargetPosR.x, TargetPosR.y) > CalfLength + ThighLength)
+        if (MathCustom.Hyp(TargetPosR.x, TargetPosR.y) > CalfLength + ThighLength)
         {
             setTargetKneeAngle(0);
             TargetPosR = new Vector2(Mathf.Cos(TargetAngleR * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f), -Mathf.Sin(TargetAngleR * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f));
         }
-        if (MathC.Hyp(TargetPosL.x, TargetPosL.y) > CalfLength + ThighLength)
+        if (MathCustom.Hyp(TargetPosL.x, TargetPosL.y) > CalfLength + ThighLength)
         {
             setTargetKneeAngle(1);
             TargetPosL = new Vector2(Mathf.Cos(TargetAngleL * Mathf.Deg2Rad) * (ThighLength + CalfLength -0.05f), -Mathf.Sin(TargetAngleL * Mathf.Deg2Rad) * (ThighLength + CalfLength - 0.05f));
         }
 
         //apply torque to the main body to stand up
-        rigidbodyRef.AddTorque(Mathf.Clamp(-transform.rotation.z*300, -8000,8000));
+        rigidbodyRef.AddTorque(Mathf.Clamp(-transform.rotation.z*1000, -10000,10000));
 
         //move the hips and knees to correct positions
-        RHipM = new JointMotor2D { motorSpeed = -(RHip.jointAngle - TargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        RHipM = new JointMotor2D { motorSpeed = -(RHip.jointAngle - TargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000000 };
         RHip.motor = RHipM;
-        RKneeM = new JointMotor2D { motorSpeed = -(RKnee.jointAngle - KneeTargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        RKneeM = new JointMotor2D { motorSpeed = -(RKnee.jointAngle - KneeTargetAngleR) / 15 * jointSpeed, maxMotorTorque = 100000000000 };
         RKnee.motor = RKneeM;
-        LHipM = new JointMotor2D { motorSpeed = -(LHip.jointAngle - TargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        LHipM = new JointMotor2D { motorSpeed = -(LHip.jointAngle - TargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000000 };
         LHip.motor = LHipM;
-        LKneeM = new JointMotor2D { motorSpeed = -(LKnee.jointAngle - KneeTargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000 };
+        LKneeM = new JointMotor2D { motorSpeed = -(LKnee.jointAngle - KneeTargetAngleL) / 15 * jointSpeed, maxMotorTorque = 100000000000 };
         LKnee.motor = LKneeM;
 
 

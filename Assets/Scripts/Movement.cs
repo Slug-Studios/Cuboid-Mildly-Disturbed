@@ -8,7 +8,7 @@ public class Movement : MonoBehaviour
     public Rigidbody2D PlayerBody;
     private float MaxRotSpeed = 360;
     public List<bool> Upgrades;
-    private float jumpForce = 1500;
+    private float jumpForce = 25000;
     private int jumpsLeft;
     public int jumpsMax;
     public GameObject rocket;
@@ -19,10 +19,9 @@ public class Movement : MonoBehaviour
     public GameObject Sword;
     public float swordRot;
     public GameObject SwordControl;
-    public float RotForce =  1;
+    public float RotForce =  100000000000000000;
     public float Health;
     public float MaxHealth = 500;
-    public float DamageRes;
     public GameObject Springs;
     public Slider healthBar;
     public float damageRes;
@@ -43,6 +42,13 @@ public class Movement : MonoBehaviour
     public Slider gunSelectSlider;
     public Text gunSelectText;
     public Text gunInfo;
+    private float focusTimeMax = 10;
+    private float focusTime;
+    private float telekinesesWeakForce = 200;
+    private float telekinesesStrongForce = 500;
+    private float focusTimeSlowFac = 0.5f;
+    public GameObject focusCircle;
+    public FocusCameraShading focusShader;
 
     private void Awake()
     {
@@ -134,6 +140,25 @@ public class Movement : MonoBehaviour
                 gunInfo.text = ("Ammo: " + gunOut.GetComponent<GunScript>().ammo + "/" + gunOut.GetComponent<GunScript>().ammoMax);
             }
         }
+        //telekenesis
+        if (Upgrades[10])
+        {
+            if (Input.GetKey(KeyCode.F))
+            {
+                focusTime+= Time.deltaTime;
+                Time.timeScale = focusTimeSlowFac;
+                focusCircle.SetActive(true);
+                focusShader.enabled = true;
+            } else
+            {
+                if (focusTime > 0)
+                {
+                    focusTime -= Time.deltaTime / 2;
+                }
+                focusCircle.SetActive(false);
+                focusShader.enabled = false;
+            }
+        }
     }
 
     //Dirrectional Dash/Jump Function
@@ -142,7 +167,7 @@ public class Movement : MonoBehaviour
         if (Upgrades[3])
         {
             
-            PlayerBody.AddForce((Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position) * jumpForce/5);
+            PlayerBody.AddForce((Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position) * jumpForce/3);
         }
         else
         {
@@ -153,15 +178,15 @@ public class Movement : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         jumpsLeft = jumpsMax;
-        //Calculate fall damage based on 1/4 of kinetic energy
+        //Calculate fall damage based on 1/40 of kinetic energy
         if (collision.GetComponent<Rigidbody2D>() != null)
         {
             if (Mathf.Sqrt(Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.x, 2) + Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.y, 2)) >= 20)
             {
-                Health = Health - (Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.x, 2) + Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.y, 2)) * gameObject.GetComponent<Rigidbody2D>().mass / 8 * 1 - DamageRes;
+                Health = Health - (Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.x, 2) + Mathf.Pow(gameObject.GetComponent<Rigidbody2D>().velocity.y, 2)) * gameObject.GetComponent<Rigidbody2D>().mass / 80 * (1 - damageRes);
             }
-            //Calculate damage taken based on 1/4 of kinetic energy
-            Health = Health - (Mathf.Pow(collision.GetComponent<Rigidbody2D>().velocity.x, 2) + Mathf.Pow(collision.GetComponent<Rigidbody2D>().velocity.y, 2)) * collision.GetComponent<Rigidbody2D>().mass / 8 * 1 - damageRes;
+            //Calculate damage taken based on 1/40 of kinetic energy
+            Health = Health - (Mathf.Pow(collision.GetComponent<Rigidbody2D>().velocity.x, 2) + Mathf.Pow(collision.GetComponent<Rigidbody2D>().velocity.y, 2)) * collision.GetComponent<Rigidbody2D>().mass / 80 * (1 - damageRes);
         }
         //update health bar
         healthBar.value = Health;
@@ -217,32 +242,33 @@ public class Movement : MonoBehaviour
         }
     }
     //Menu shit
-    public void Togg0()//Movement, 0
+    public void Togg00()//Movement, 0
     {
         Upgrades[0] = !Upgrades[0];
     }
-    public void Togg1()//fast rotate, 1
+    public void Togg01()//fast rotate, 1
     {
         Upgrades[1] = !Upgrades[1];
     }
-    public void Togg2()//Jump, 2
+    public void Togg02()//Jump, 2
     {
         Upgrades[2] = !Upgrades[2];
     }
-    public void Togg3()//Dash, 3
+    public void Togg03()//Dash, 3
     {
         Upgrades[3] = !Upgrades[3];
     }
-    public void Togg4()//rocket, 4
+    public void Togg04()//rocket, 4
     {
         Upgrades[4] = !Upgrades[4];
     }
-    public void Togg5()//Legs, index 5
+    public void Togg05()//Legs, index 5
     {
+        GetComponent<LegController>().enabled = !GetComponent<LegController>().enabled;
         Legs.SetActive(!Legs.activeInHierarchy);
         transform.position = new Vector3(transform.position.x, transform.position.y + 2, transform.position.z);
     }
-    public void Togg6()//Sword, index 6
+    public void Togg06()//Sword, index 6
     {
         Upgrades[6] = !Upgrades[6];
         SwordControl.SetActive(!SwordControl.activeInHierarchy);
@@ -251,18 +277,18 @@ public class Movement : MonoBehaviour
         swordBlade.transform.localScale = new Vector2(Mathf.Clamp(swordScale, 0.75f, 1.8f), swordScale * 10);
         swordBlade.GetComponent<Rigidbody2D>().mass = swordBlade.transform.localScale.x * swordBlade.transform.localScale.y/10;
     }
-    public void Togg7()//Springs, index 7
+    public void Togg07()//Springs, index 7
     {
         transform.position = new Vector3(transform.position.x, transform.position.y + 1, transform.position.z);
         Springs.SetActive(!Springs.activeInHierarchy);
     }
-    public void Togg8()//Grappling Hook, Index 8 
+    public void Togg08()//Grappling Hook, Index 8 
     {
         gameObject.GetComponent<grapplingScript>().DestroyHook();
         grapplingHook.SetActive(!grapplingHook.activeInHierarchy);
         gameObject.GetComponent<grapplingScript>().enabled = !gameObject.GetComponent<grapplingScript>().isActiveAndEnabled;
     }
-    public void Togg9()//Guns, Index 9
+    public void Togg09()//Guns, Index 9
     {
         switch (IsGunOut)
         {
@@ -282,6 +308,10 @@ public class Movement : MonoBehaviour
                 gunInfo.enabled = true;
                 break;
         }
+    }
+    public void Togg10()//basic telekinesis
+    {
+        Upgrades[10] = !Upgrades[10];
     }
 
 }

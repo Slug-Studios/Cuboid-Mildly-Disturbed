@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MathC
+public class MathCustom
 {
     //custom math functions
 
