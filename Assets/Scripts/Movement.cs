@@ -152,7 +152,7 @@ public class Movement : MonoBehaviour
                 if(focusShader.intensity < 1)
                 {
                     focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (2f * (Time.deltaTime/focusTimeSlowFac)));
-                    Debug.Log(focusShader.intensity);
+                    //Debug.Log(focusShader.intensity);
                 }
                 
                 focusShader.enabled = true;
@@ -167,7 +167,7 @@ public class Movement : MonoBehaviour
                 if (focusShader.intensity > 0)
                 {
                     focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f*Time.deltaTime));
-                    Debug.Log(focusShader.intensity);
+                    //Debug.Log(focusShader.intensity);
                 }
                 else
                 {

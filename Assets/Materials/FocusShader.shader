@@ -13,7 +13,12 @@ Shader "tintImageEffectShader"
       Cull Off 
       ZWrite Off 
       ZTest Always
-
+      
+      Tags
+      {
+      "Queue" = "Overlay"
+      }
+      
       Pass
       {
          CGPROGRAM
