@@ -44,12 +44,13 @@ public class Movement : MonoBehaviour
     public Text gunInfo;
     private float focusTimeMax = 10;
     private float focusTime;
-    private float telekinesesWeakForce = 200;
-    private float telekinesesStrongForce = 500;
+    private float telekinesesWeakForce = 10000;
     private float focusTimeSlowFac = 0.5f;
     public GameObject focusCircle;
     public FocusCameraShading focusShader;
     public bool focusOverload;
+    private Rigidbody2D telekinesisObject;
+    public float focusCircleRad = 2.5f;
 
     private void Awake()
     {
@@ -62,6 +63,7 @@ public class Movement : MonoBehaviour
         Health = MaxHealth;
         healthBar.maxValue = MaxHealth;
         healthBar.value = Health;
+        focusCircle.transform.localScale = new Vector2(focusCircleRad * 2, focusCircleRad * 2);
 
     }
 
@@ -170,6 +172,28 @@ public class Movement : MonoBehaviour
                 {
                     focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (2f * (Time.deltaTime / focusTimeSlowFac)));
                     Debug.Log(focusShader.intensity);
+                }
+                //goofy ah telekinesis
+                Vector2 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (Input.GetMouseButtonDown(0))
+                {
+                    RaycastHit2D Cast = Physics2D.CircleCast(mousepos, 0.05f, Vector2.down, 0f);
+                    telekinesisObject = Cast.rigidbody;
+                }
+                if (Input.GetMouseButton(0) && telekinesisObject != null)
+                {
+                    Vector2 relativeDst = mousepos - (Vector2)telekinesisObject.transform.position;
+                    relativeDst = new Vector2(Mathf.Clamp(relativeDst.x, -1, 1), Mathf.Clamp(relativeDst.y, -1, 1));
+                    telekinesisObject.AddForce(relativeDst * Time.deltaTime * telekinesesWeakForce);
+                    relativeDst = (Vector2)transform.position - (Vector2)telekinesisObject.transform.position;
+                    if (relativeDst.magnitude > focusCircleRad)
+                    {
+                        telekinesisObject = null;
+                    }
+                }
+                if (Input.GetMouseButtonUp(0))
+                {
+                    telekinesisObject = null;
                 }
             } else
             {
@@ -344,5 +368,4 @@ public class Movement : MonoBehaviour
     {
         Upgrades[10] = !Upgrades[10];
     }
-
 }
