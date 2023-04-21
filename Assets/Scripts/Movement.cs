@@ -42,15 +42,23 @@ public class Movement : MonoBehaviour
     public Slider gunSelectSlider;
     public Text gunSelectText;
     public Text gunInfo;
-    private float focusTimeMax = 10;
     private float focusTime;
     private float telekinesesWeakForce = 10000;
+    private float telekinesesStrongForce = 500;
     private float focusTimeSlowFac = 0.5f;
+    public Text focusTimeText;
     public GameObject focusCircle;
     public FocusCameraShading focusShader;
-    public bool focusOverload;
     private Rigidbody2D telekinesisObject;
     public float focusCircleRad = 2.5f;
+    [Tooltip("Maximum time in seconds that a player can focus for.")]
+    public float focusTimeMax = 10;
+    [Tooltip("Penalty in seconds for focusing for the max time.")]
+    public float focusTimeOverflow = 5;
+    [Tooltip("Multiplier for focus shader fade-in time. \n(1f = 1 second, 2f = 0.5 seconds)")]
+    public float focusWarmup = 2f;
+    [Tooltip("Multiplier for focus shader fade-out time. \n(1f = 1 second, 2f = 0.5 seconds)")]
+    public float focusCooldown = 4f;
 
     private void Awake()
     {
@@ -146,33 +154,20 @@ public class Movement : MonoBehaviour
         //telekenesis
         if (Upgrades[10])
         {
-            if (focusOverload)
+            if (Input.GetKey(KeyCode.F) && focusTime < focusTimeMax)
             {
-                if (Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
-                if (focusTime > 0)
-                {
-                    focusTime -= Time.deltaTime / 2;
-                }
-                focusCircle.SetActive(false);
-                if (focusShader.intensity > 0)
-                {
-                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f * Time.deltaTime));
-                    Debug.Log(focusShader.intensity);
-                }
-                else
-                {
-                    focusShader.enabled = false;
-                }
-            } else if (Input.GetKey(KeyCode.F) && focusTime <= focusTimeMax)
-            {
-                focusTime+= Time.deltaTime;
+                focusTime = Mathf.Min(focusTime + Time.deltaTime/focusTimeSlowFac, focusTimeMax);
+                focusTimeText.text = "Focus cooldown:" + focusTime.ToString("0.00");
+                if (focusTime == focusTimeMax) { focusTime = focusTimeMax + focusTimeOverflow; }
                 Time.timeScale = focusTimeSlowFac;
-                focusCircle.SetActive(true);
-                if (focusShader.intensity < 1)
+                //focusCircle.SetActive(true); I'll be raplacing this with shader magic soon
+                if(focusShader.intensity < 1)
                 {
-                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (2f * (Time.deltaTime / focusTimeSlowFac)));
-                    Debug.Log(focusShader.intensity);
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (focusWarmup * (Time.deltaTime/focusTimeSlowFac)));
                 }
+                
+                focusShader.enabled = true;
+
                 //goofy ah telekinesis
                 Vector2 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 if (Input.GetMouseButtonDown(0))
@@ -197,16 +192,26 @@ public class Movement : MonoBehaviour
                 }
             } else
             {
-                if (Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
+                if(Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
                 if (focusTime > 0)
                 {
-                    focusTime -= Time.deltaTime / 2;
+                    if (focusTime == focusTimeMax) { focusTime = 0; }
+                    if (focusTime > focusTimeMax) {
+                        focusTime = Mathf.Max(focusTime - Time.deltaTime, focusTimeMax);
+                        focusTimeText.text = "Focus cooldown:" + (focusTime - focusTimeMax).ToString("0.00");
+                    }
+                    else
+                    {
+                        focusTime = Mathf.Max(focusTime - Time.deltaTime, 0);
+                        focusTimeText.text = "Focus cooldown:" + focusTime.ToString("0.00");
+                    }
+                    
+                    
                 }
-                focusCircle.SetActive(false);
+                //focusCircle.SetActive(false);
                 if (focusShader.intensity > 0)
                 {
-                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (4f * Time.deltaTime));
-                    Debug.Log(focusShader.intensity);
+                    focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (focusCooldown*Time.deltaTime));
                 }
                 else
                 {
@@ -368,4 +373,5 @@ public class Movement : MonoBehaviour
     {
         Upgrades[10] = !Upgrades[10];
     }
+
 }
