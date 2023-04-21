@@ -58,7 +58,7 @@ MonoBehaviour:
   Player: {fileID: 0}
   movementType: 01
   followRange: 10
-  Speed: 2500
+  Speed: 30000
   maxSpeed: 360
   Canvas: {fileID: 157281940929507616}
   healthBar: {fileID: 157281941395361768}
