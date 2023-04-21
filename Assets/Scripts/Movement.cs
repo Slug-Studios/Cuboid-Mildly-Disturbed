@@ -43,12 +43,14 @@ public class Movement : MonoBehaviour
     public Text gunSelectText;
     public Text gunInfo;
     private float focusTime;
-    private float telekinesesWeakForce = 200;
+    private float telekinesesWeakForce = 10000;
     private float telekinesesStrongForce = 500;
     private float focusTimeSlowFac = 0.5f;
     public Text focusTimeText;
     public GameObject focusCircle;
     public FocusCameraShading focusShader;
+    private Rigidbody2D telekinesisObject;
+    public float focusCircleRad = 2.5f;
     [Tooltip("Maximum time in seconds that a player can focus for.")]
     public float focusTimeMax = 10;
     [Tooltip("Penalty in seconds for focusing for the max time.")]
@@ -69,6 +71,7 @@ public class Movement : MonoBehaviour
         Health = MaxHealth;
         healthBar.maxValue = MaxHealth;
         healthBar.value = Health;
+        focusCircle.transform.localScale = new Vector2(focusCircleRad * 2, focusCircleRad * 2);
 
     }
 
@@ -164,6 +167,29 @@ public class Movement : MonoBehaviour
                 }
                 
                 focusShader.enabled = true;
+
+                //goofy ah telekinesis
+                Vector2 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (Input.GetMouseButtonDown(0))
+                {
+                    RaycastHit2D Cast = Physics2D.CircleCast(mousepos, 0.05f, Vector2.down, 0f);
+                    telekinesisObject = Cast.rigidbody;
+                }
+                if (Input.GetMouseButton(0) && telekinesisObject != null)
+                {
+                    Vector2 relativeDst = mousepos - (Vector2)telekinesisObject.transform.position;
+                    relativeDst = new Vector2(Mathf.Clamp(relativeDst.x, -1, 1), Mathf.Clamp(relativeDst.y, -1, 1));
+                    telekinesisObject.AddForce(relativeDst * Time.deltaTime * telekinesesWeakForce);
+                    relativeDst = (Vector2)transform.position - (Vector2)telekinesisObject.transform.position;
+                    if (relativeDst.magnitude > focusCircleRad)
+                    {
+                        telekinesisObject = null;
+                    }
+                }
+                if (Input.GetMouseButtonUp(0))
+                {
+                    telekinesisObject = null;
+                }
             } else
             {
                 if(Time.timeScale == focusTimeSlowFac) { Time.timeScale = 1; }
