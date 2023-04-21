@@ -1,10 +1,8 @@
 using System;
 using UnityEngine;
-
 [RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
-
-public class FocusCameraShading: MonoBehaviour
+public class FocusCameraShading : MonoBehaviour
 {
 
     public Material material;
