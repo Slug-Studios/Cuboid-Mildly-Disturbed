@@ -44,6 +44,7 @@ public class Movement : MonoBehaviour
     public Text gunInfo;
     private float focusTime;
     private float telekinesesWeakForce = 10000;
+    private float telekinesesStrongForce = 500;
     private float focusTimeSlowFac = 0.5f;
     public Text focusTimeText;
     public GameObject focusCircle;
