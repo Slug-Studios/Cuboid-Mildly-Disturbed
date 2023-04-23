@@ -4452,6 +4452,10 @@ PrefabInstance:
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Togg02
       objectReference: {fileID: 0}
+    - target: {fileID: 3295570083356436160, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -13.090027
+      objectReference: {fileID: 0}
     - target: {fileID: 3295570083387514410, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: m_SizeDelta.y
       value: 238.28
@@ -4596,6 +4600,14 @@ PrefabInstance:
     - target: {fileID: 3295570083828307494, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Togg03
+      objectReference: {fileID: 0}
+    - target: {fileID: 3295570083852477229, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -83.29999
+      objectReference: {fileID: 0}
+    - target: {fileID: 3295570083852477229, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 10.599976
       objectReference: {fileID: 0}
     - target: {fileID: 3295570083894176355, guid: e24cdea69ca02f94dae05ce3b37105c0, type: 3}
       propertyPath: m_AnchorMax.x
