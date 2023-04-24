@@ -9,6 +9,8 @@ public class FocusCameraShading : MonoBehaviour
     /// Post processing effect. This will probably handle all the post processing effects in the future.
     /// </summary>
     public Material material;
+    //other focus shader
+    public Material focusSquaresMaterial;
     ///Maybe do something similar to the ones below.
     [Tooltip("Intensity of effect.")]
     public float intensity = 0;
@@ -28,7 +30,8 @@ public class FocusCameraShading : MonoBehaviour
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        material.SetFloat("_Intensity", intensity);
+        material.SetFloat("_Intensity", intensity);//for some reason crashes if I pass it directly to shader
+        focusSquaresMaterial.SetFloat("_Intensity", intensity);
         Graphics.Blit(source, destination, material);
     }
 }

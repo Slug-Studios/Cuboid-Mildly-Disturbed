@@ -18,6 +18,7 @@ Shader "tintImageEffectShader"
       
       Tags
       {
+      "RenderType" = "Overlay"
       "Queue" = "Overlay"
       }
       

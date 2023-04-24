@@ -59,10 +59,14 @@ public class Movement : MonoBehaviour
     public float focusWarmup = 2f;
     [Tooltip("Multiplier for focus shader fade-out time. \n(1f = 1 second, 2f = 0.5 seconds)")]
     public float focusCooldown = 4f;
+    [Tooltip("Ring of squares around player.")]
+    public ParticleSystem focusParticleSystem;
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+        ParticleSystemRenderer focusParticleSystemRenderer = focusParticleSystem.GetComponent<ParticleSystemRenderer>();
+        focusShader.focusSquaresMaterial = focusParticleSystemRenderer.material;
     }
 
     // Start is called before the first frame update
@@ -160,14 +164,29 @@ public class Movement : MonoBehaviour
                 focusTimeText.text = "Focus cooldown:" + focusTime.ToString("0.00");
                 if (focusTime == focusTimeMax) { focusTime = focusTimeMax + focusTimeOverflow; }
                 Time.timeScale = focusTimeSlowFac;
-                //focusCircle.SetActive(true); I'll be raplacing this with shader magic soon
                 if(focusShader.intensity < 1)
                 {
                     focusShader.intensity = Mathf.Clamp01(focusShader.intensity + (focusWarmup * (Time.deltaTime/focusTimeSlowFac)));
                 }
                 
                 focusShader.enabled = true;
-
+                if (focusParticleSystem.isStopped)
+                {
+                    var overcomplicatedSystem = focusParticleSystem.shape;
+                    overcomplicatedSystem.radius = focusCircleRad;
+                    focusParticleSystem.Clear();
+                    focusParticleSystem.Emit(50);
+                    ParticleSystem.Particle[] particles = new ParticleSystem.Particle[50];
+                    focusParticleSystem.GetParticles(particles);
+                    int i = 0;
+                    for (; i < 50; i++)
+                    {
+                        particles[i].startLifetime = UnityEngine.Random.Range(5.0f, 20.0f);
+                        particles[i].startSize = UnityEngine.Random.Range(0.1f, 0.4f);
+                    }
+                    focusParticleSystem.SetParticles(particles);
+                    focusParticleSystem.Play();
+                }
                 //goofy ah telekinesis
                 Vector2 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 if (Input.GetMouseButtonDown(0))
@@ -208,15 +227,23 @@ public class Movement : MonoBehaviour
                     
                     
                 }
-                //focusCircle.SetActive(false);
                 if (focusShader.intensity > 0)
                 {
                     focusShader.intensity = Mathf.Clamp01(focusShader.intensity - (focusCooldown*Time.deltaTime));
+                    if (focusParticleSystem.isEmitting)
+                    {
+                        focusParticleSystem.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+                    }
                 }
                 else
                 {
                     focusShader.enabled = false;
+                    if (focusParticleSystem.IsAlive())
+                    {
+                        focusParticleSystem.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    }
                 }
+                
             }
         }
     }
